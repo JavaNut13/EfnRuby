@@ -47,4 +47,38 @@ module EfnRuby
   end
 end
 
+module EfnStrings
+  def self.included(base)
+    base.class_eval do
+      def to_proc
+        return Proc.new do |item|
+          res = item
+          self.split('.').map(&:to_sym).map(&:to_proc).each do |func|
+            res = func.call res
+          end
+          res
+        end
+      end
+    end
+  end
+end
+
+module EfnArrays
+  def self.included(base)
+    base.class_eval do
+      def to_proc
+        return Proc.new do |item|
+          res = item
+          map(&:to_proc).each do |func|
+            res = func.call res
+          end
+          res
+        end
+      end
+    end
+  end
+end
+
 BasicObject.send(:include, EfnRuby)
+String.send(:include, EfnStrings)
+Array.send(:include, EfnArrays)
